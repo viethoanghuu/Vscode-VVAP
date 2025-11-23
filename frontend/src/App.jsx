@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import axios from "axios";
 import StatsCards from "./components/StatsCards";
 import HistogramChart from "./components/HistogramChart";
@@ -26,7 +26,25 @@ export default function App() {
   const [activeSources, setActiveSources] = useState([]);
   const [toast, setToast] = useState(null);
 
-  const API = import.meta.env.VITE_API_URL;
+  const API = useMemo(
+    () => (import.meta.env.VITE_API_URL || "http://localhost:4000").replace(/\/$/, ""),
+    [],
+  );
+
+  const normalizeAggregate = (agg) => {
+    if (!agg) return null;
+    const perSource = (agg.by_source || []).reduce((acc, s) => {
+      acc[s.source] = { average: s.average_rating, count: s.review_count };
+      return acc;
+    }, {});
+    const histogramArr = [1, 2, 3, 4, 5].map((n) => agg.rating_histogram?.[String(n)] || 0);
+    return {
+      count: agg.overall?.total_reviews ?? 0,
+      average: Number(agg.overall?.average_rating ?? 0),
+      perSource,
+      histogram: histogramArr,
+    };
+  };
 
   async function fetchReviews() {
     try {
@@ -36,9 +54,11 @@ export default function App() {
         axios.get(`${API}/api/products/${selected}/reviews`),
         axios.get(`${API}/api/products/${selected}/aggregate`),
       ]);
-      setReviews(res.data);
-      setStats(agg.data);
-      setActiveSources(Object.keys(agg.data?.perSource || {}));
+      const reviewsData = res.data?.data ?? res.data ?? [];
+      const aggData = normalizeAggregate(agg.data?.data ?? agg.data);
+      setReviews(reviewsData);
+      setStats(aggData);
+      setActiveSources(Object.keys(aggData?.perSource || {}));
       setToast({ type: "success", message: "Fetched & updated reviews." });
     } catch (err) {
       console.error(err);

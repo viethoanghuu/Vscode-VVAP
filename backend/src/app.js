@@ -1,30 +1,45 @@
-﻿const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
+﻿import express from "express";
+import cors from "cors";
 
-const productsRouter = require('./routes/products');
+import productsRouter from "./routes/products.js";
 
 const app = express();
 
-app.use(morgan('dev'));
+// lightweight request logger
+app.use((req, res, next) => {
+  const started = Date.now();
+  res.on("finish", () => {
+    const ms = Date.now() - started;
+    console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms`);
+  });
+  next();
+});
 app.use(express.json());
-app.use(cors({
-  origin: process.env.FRONTEND_ORIGIN || 'http://localhost:5173',
-  credentials: true
-}));
 
-app.get('/health', (req, res) => res.json({ status: 'ok' }));
+const allowedOrigins =
+  process.env.FRONTEND_ORIGIN?.split(",").map((s) => s.trim()).filter(Boolean) ||
+  ["http://localhost:5173"];
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  }),
+);
 
-app.use('/api/products', productsRouter);
+app.get("/health", (_req, res) => res.json({ status: "ok" }));
+app.use("/api/products", productsRouter);
 
 // 404
-app.use((req, res) => res.status(404).json({ success: false, error: 'Not Found' }));
+app.use((req, res) => res.status(404).json({ success: false, error: "Not Found" }));
 
 // error handler
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   console.error(err);
   if (res.headersSent) return next(err);
-  res.status(err.status || 500).json({ success: false, error: err.message || 'Internal Server Error' });
+  res
+    .status(err.status || 500)
+    .json({ success: false, error: err.message || "Internal Server Error" });
 });
 
-module.exports = app;
+export default app;
