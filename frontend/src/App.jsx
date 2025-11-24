@@ -130,7 +130,53 @@ export default function App() {
       </section>
 
       <footer className="footer">
-        <span>Built with React + Recharts • {new Date().getFullYear()}</span>
+        <div className="footer-inner">
+          <div className="footer-col">
+            <h4>VVAP</h4>
+            <p>Aggregating gaming laptop reviews from multiple sources to help you decide faster.</p>
+          </div>
+
+          <div className="footer-col">
+            <h5>Sources</h5>
+            <ul>
+              <li>Amazon</li>
+              <li>BestBuy</li>
+              <li>Newegg</li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h5>Features</h5>
+            <ul>
+              <li>Review statistics</li>
+              <li>Source breakdown</li>
+              <li>Rating distribution</li>
+            </ul>
+          </div>
+
+          <div className="footer-col">
+            <h5>About</h5>
+            <ul>
+              <li>Built with React, Express, and MySQL</li>
+              <li>© {new Date().getFullYear()} VVAP Aggregator</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-divider" />
+
+        <div className="footer-team">
+          <div className="footer-team-title">Project Team</div>
+          <div className="footer-team-list">
+            <span>Nguyễn Công Phúc</span>
+            <span>•</span>
+            <span>Hoàng Hữu Việt</span>
+            <span>•</span>
+            <span>Đặng Thuý An</span>
+            <span>•</span>
+            <span>Lê Đức Minh Vương</span>
+          </div>
+        </div>
       </footer>
     </div>
   );
