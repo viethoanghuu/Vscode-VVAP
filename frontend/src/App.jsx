@@ -329,15 +329,27 @@ export default function App() {
 
             <StatsCards stats={stats} />
 
-            <div className="grid charts wide">
-              <HistogramChart histogram={stats?.histogram} />
-              <SourceBreakdownChart perSource={stats?.perSource} />
-            </div>
+            {(() => {
+              const row = [
+                stats?.histogram ? <HistogramChart key="hist" histogram={stats.histogram} /> : null,
+                stats?.perSource ? <SourceBreakdownChart key="src" perSource={stats.perSource} /> : null,
+              ].filter(Boolean);
+              if (!row.length) return null;
+              const layoutClass = row.length === 1 ? "charts single" : "charts wide";
+              return <div className={`grid ${layoutClass}`}>{row}</div>;
+            })()}
 
-            <div className="grid charts wide">
-              <TrendChart data={stats?.trend} />
-              <StatusChart statusCounts={stats?.statusCounts} />
-            </div>
+            {(() => {
+              const hasTrend = Array.isArray(stats?.trend) && stats.trend.length > 0;
+              const hasStatus = Boolean(stats?.statusCounts);
+              const row = [
+                hasTrend ? <TrendChart key="trend" data={stats.trend} /> : null,
+                hasStatus ? <StatusChart key="status" statusCounts={stats.statusCounts} /> : null,
+              ].filter(Boolean);
+              if (!row.length) return null;
+              const layoutClass = row.length === 1 ? "charts single" : "charts wide";
+              return <div className={`grid ${layoutClass}`}>{row}</div>;
+            })()}
 
             <FilterBar perSource={stats?.perSource} active={activeSources} onChange={setActiveSources} />
 
