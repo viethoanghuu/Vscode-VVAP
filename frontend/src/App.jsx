@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import StatsCards from "./components/StatsCards";
 import HistogramChart from "./components/HistogramChart";
@@ -8,10 +8,6 @@ import Toast from "./components/Toast";
 import "./App.css";
 import RatingStars from "./components/RatingStars";
 import FilterBar from "./components/FilterBar";
-import TrendChart from "./components/TrendChart";
-import StatusChart from "./components/StatusChart";
-import AdminPanel from "./components/AdminPanel";
-import ProductManager from "./components/ProductManager";
 
 const FALLBACK_PRODUCTS = [
   { id: "asus-rog-zephyrus-g16", name: "ASUS ROG Zephyrus G16" },
@@ -23,14 +19,14 @@ const FALLBACK_PRODUCTS = [
 ];
 
 const PRODUCT_IMAGES = {
-  "asus-rog-zephyrus-g16": "/images/asusrogzephyrusg16.jpg",
-  "lenovo-legion-5-pro": "/images/lenovolegion5pro.jpg",
-  "acer-predator-helios-300": "/images/acerpredatorhelios300.webp",
-  "msi-raider-ge78": "/images/RaiderGE78.jpg",
-  "alienware-m16": "/images/alienwarem16.jpg",
-  "hp-omen-16": "/images/hpomen.avif",
-};
-const DEFAULT_PRODUCT_IMAGE = "/images/lenovolegion5pro.jpg";
+  "asus-rog-zephyrus-g16":
+    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80",
+  "lenovo-legion-5-pro":
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+  "acasusrogzephyrusg16predator-helios-300":
+    "https://imageslenovolegion5proash.com/photo-1505740420928-5e560c06d30e?auto=facerpredatorhelios300.jpgcrop&w=1200&q=80",
+  "msi-raider-RaiderGE78
+    "https://images.unsplash.com/palienwarem16.jpg77542470-605612bd2d61?auto=fohpomen.avifrop&w=12const DEFAULT_PRODUCT_IMAGE = "/images/lenovolegion5pro.jpg";
 
 const TABS = [
   { id: "dashboard", label: "Dashboard" },
@@ -428,9 +424,3 @@ export default function App() {
             <span>Dang Thuy An</span>
             <span>•</span>
             <span>Le Duc Minh Vuong</span>
-          </div>
-        </div>
-      </footer>
-    </div>
-  );
-}
