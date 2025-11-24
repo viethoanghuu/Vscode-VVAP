@@ -121,7 +121,7 @@ html { scroll-behavior: smooth; }
 .grid { display: grid; gap: 18px; }
 .cards { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 18px; align-items: stretch; }
 .charts { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: stretch; }
-.charts.wide { grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); }
+.charts.wide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .charts .card {
   min-height: 320px;
   display: flex;
