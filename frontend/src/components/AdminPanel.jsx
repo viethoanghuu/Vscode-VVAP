@@ -20,7 +20,7 @@ export default function AdminPanel({ reviews = [], onModerate, loading }) {
       </div>
 
       {loading ? (
-        <p className="muted">Loading moderation queue…</p>
+        <p className="muted">Loading moderation queue...</p>
       ) : reviews.length === 0 ? (
         <p className="muted">No flagged or pending reviews 🎉</p>
       ) : (

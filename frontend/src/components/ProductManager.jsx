@@ -10,8 +10,8 @@ export default function ProductManager({
 }) {
   return (
     <div className="card product-card">
-      <h3 className="card-title">Quản lý sản phẩm</h3>
-      <div className="label">Thêm sản phẩm mới hoặc xoá khỏi danh sách</div>
+      <h3 className="card-title">Product management</h3>
+      <div className="label">Add new products or remove them from the list</div>
 
       <form
         className="product-form"
@@ -30,7 +30,7 @@ export default function ProductManager({
           />
         </label>
         <label>
-          <span>Tên sản phẩm</span>
+          <span>Product name</span>
           <input
             required
             value={form.name}
@@ -39,7 +39,7 @@ export default function ProductManager({
           />
         </label>
         <label>
-          <span>Ảnh (URL)</span>
+          <span>Image (URL)</span>
           <input
             value={form.image_url}
             onChange={(e) => onChange({ ...form, image_url: e.target.value })}
@@ -47,7 +47,7 @@ export default function ProductManager({
           />
         </label>
         <label>
-          <span>Link gốc (từ sàn TMĐT)</span>
+          <span>Source link (e-commerce)</span>
           <input
             value={form.source_url}
             onChange={(e) => onChange({ ...form, source_url: e.target.value })}
@@ -55,13 +55,13 @@ export default function ProductManager({
           />
         </label>
         <button type="submit" disabled={submitting}>
-          {submitting ? "Đang lưu..." : "Lưu sản phẩm"}
+          {submitting ? "Saving..." : "Save product"}
         </button>
       </form>
 
       <div className="product-list">
         {products.length === 0 ? (
-          <p className="muted">Chưa có sản phẩm nào.</p>
+          <p className="muted">No products yet.</p>
         ) : (
           products.map((p) => (
             <div key={p.id} className="product-row">
@@ -70,7 +70,7 @@ export default function ProductManager({
                 <div className="product-meta">{p.id}</div>
               </div>
               <button type="button" className="danger" onClick={() => onDelete && onDelete(p.id)}>
-                Xoá
+                Delete
               </button>
             </div>
           ))

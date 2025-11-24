@@ -1,26 +1,26 @@
-# VVAP – Gaming Laptop Review Aggregator
+# VVAP - Gaming Laptop Review Aggregator
 
-Ứng dụng full‑stack demo để gom đánh giá (reviews) từ nhiều nguồn cho laptop gaming và hiển thị biểu đồ/tổng hợp. Stack: React + Vite (frontend), Express + MySQL (backend), kèm một mock scraper nhỏ.
+Demo full-stack app that aggregates gaming laptop reviews from multiple sources and visualizes the data. Stack: React + Vite (frontend), Express + MySQL (backend), plus a small mock scraper.
 
-## Mục lục
-- [Cấu trúc thư mục](#cấu-trúc-thư-mục)
-- [Chạy nhanh với Docker](#chạy-nhanh-với-docker)
-- [Chạy thủ công khi dev](#chạy-thủ-công-khi-dev)
-- [API backend](#api-backend)
-- [Model dữ liệu](#model-dữ-liệu)
-- [Cách dùng frontend](#cách-dùng-frontend)
-- [Tuỳ chỉnh/ghi chú](#tuỳ-chỉnhghi-chú)
+## Table of Contents
+- [Folder Structure](#folder-structure)
+- [Quick Start with Docker](#quick-start-with-docker)
+- [Manual Dev Setup](#manual-dev-setup)
+- [Backend API](#backend-api)
+- [Data Model](#data-model)
+- [Frontend Usage](#frontend-usage)
+- [Notes](#notes)
 
-## Cấu trúc thư mục
+## Folder Structure
 ```
 backend/   # Express API + MySQL access
 frontend/  # React + Vite SPA
-scraper/   # Mock scraper (server trả JSON reviews giả)
-docker-compose.yml  # Khởi chạy db + api + frontend bằng Docker
+scraper/   # Mock scraper (server returns fake review JSON)
+docker-compose.yml  # Launches DB + API + frontend via Docker
 ```
 
-## Chạy nhanh với Docker
-Yêu cầu: Docker + Docker Compose.
+## Quick Start with Docker
+Requirements: Docker + Docker Compose.
 
 ```bash
 docker-compose up --build
@@ -29,83 +29,83 @@ docker-compose up --build
 - API: http://localhost:4000
 - Frontend: http://localhost:5173
 - MySQL: host localhost:3306, user `root`, password `example`, db `reviews_db`
-- Lần đầu MySQL sẽ seed schema từ `backend/db/init.sql`.
+- On first run MySQL seeds the schema from `backend/db/init.sql`.
 
-## Chạy thủ công khi dev
-### 1) MySQL local
-- Tạo DB theo script: `mysql -uroot -p < backend/db/init.sql`
-- Hoặc tự tạo rồi cập nhật biến môi trường cho backend.
+## Manual Dev Setup
+### 1) Local MySQL
+- Create the DB with the script: `mysql -uroot -p < backend/db/init.sql`
+- Or create it yourself and update backend environment variables.
 
 ### 2) Backend (Express)
 ```bash
 cd backend
 npm install
-# tạo file .env nếu cần (xem biến bên dưới)
-npm run dev            # hoặc npm start cho production mode
+# create .env if needed (see variables below)
+npm run dev            # or npm start for production mode
 ```
 
-Biến môi trường chính:
+Key environment variables:
 - `PORT` (default 4000)
 - `DB_HOST` (default 127.0.0.1)
 - `DB_PORT` (default 3306)
 - `DB_USER` / `DB_PASSWORD`
 - `DB_NAME` (default reviews_db)
-- `FRONTEND_ORIGIN` cho CORS, ví dụ `http://localhost:5173`
+- `FRONTEND_ORIGIN` for CORS, e.g. `http://localhost:5173`
 
 ### 3) Frontend (React + Vite)
 ```bash
 cd frontend
 npm install
-# cấu hình endpoint backend
+# configure the backend endpoint
 echo "VITE_API_URL=http://localhost:4000" > .env.local
-npm run dev   # mở http://localhost:5173
+npm run dev   # opens http://localhost:5173
 ```
 
-### 4) Mock scraper (tuỳ chọn)
-Server giả lập dữ liệu review (không bắt buộc, backend hiện trả mock cứng).
+### 4) Mock scraper (optional)
+Mock review data server (not required; backend currently serves built-in mock data).
 ```bash
 cd scraper
 npm install
-npm start   # chạy ở :5050, endpoint GET /scrape/all/:productId
+npm start   # runs on :5050, endpoint GET /scrape/all/:productId
 ```
 
-## API backend
+## Backend API
 Base URL: `http://localhost:4000`
 
 - `GET /health`  
-  Kiểm tra sống.
+  Health check.
 
 - `POST /api/products/:id/fetch`  
-  Gọi hàm mock để lấy reviews mới, lưu vào DB. Trả `{ added, skipped, total }`.
+  Calls the mock fetcher to store new reviews in the DB. Returns `{ added, skipped, total }`.
 
 - `GET /api/products/:id/reviews`  
-  Lấy tối đa 500 reviews đã lưu của sản phẩm.
+  Retrieves up to 500 stored reviews for the product.
 
 - `GET /api/products/:id/aggregate`  
-  Trả thống kê tổng hợp:
+  Returns aggregated statistics:
   ```json
   {
     "overall": { "average_rating": 4.3, "total_reviews": 12, "min_rating": 3, "max_rating": 5 },
-    "by_source": [ { "source": "Amazon", "average_rating": 4.5, "review_count": 6 }, ... ],
+    "by_source": [ { "source": "Amazon", "average_rating": 4.5, "review_count": 6 } ],
     "rating_histogram": { "5": 4, "4": 5, "3": 2, "2": 1, "1": 0 }
   }
   ```
 
-## Model dữ liệu
-Bảng `reviews` (xem `backend/db/init.sql`):
-- PK tổng hợp: `(product_id, source, review_id)`
-- Trường chính: `product_id`, `source`, `review_id`, `author`, `rating` (TINYINT), `title`, `body`, `created_at`, `fetched_at`
+## Data Model
+Table `reviews` (see `backend/db/init.sql`):
+- Composite PK: `(product_id, source, review_id)`
+- Main fields: `product_id`, `source`, `review_id`, `author`, `rating` (TINYINT), `title`, `body`, `created_at`, `fetched_at`
 
-## Cách dùng frontend
-- Chọn laptop trong dropdown, bấm **Fetch Reviews**.  
-- Dashboard hiển thị:
-  - Cards: tổng số review, điểm trung bình, số nguồn.
-  - Biểu đồ cột histogram điểm 1–5.
-  - Pie chart tỉ trọng theo nguồn + danh sách kèm số lượng/điểm trung bình.
-  - Bảng review, có filter theo nguồn (All/None/từng nguồn).
-- Toast báo lỗi/thành công, overlay spinner khi đang fetch.
+## Frontend Usage
+- Choose a laptop in the dropdown, click **Fetch Reviews**.  
+- Dashboard shows:
+  - Cards: total reviews, average rating, number of sources.
+- Histogram of ratings 1-5.
+  - Pie chart for source share + list with counts/averages.
+  - Review table with source filters (All/None/per source).
+- Toast notifications for success/error and an overlay spinner while fetching.
 
-## Tuỳ chỉnh/Ghi chú
-- Danh sách sản phẩm mẫu nằm trong `frontend/src/App.jsx` (`PRODUCTS`).
-- Mock fetch hiện ở `backend/src/services/mockScraper.js`. Để tích hợp scraper thật, thay `fetchReviewsFromSources` bằng logic gọi service ngoài (ví dụ `scraper/index.js`).
-- CORS: chỉnh `FRONTEND_ORIGIN` (backend) và `VITE_API_URL` (frontend) khi deploy.
+## Notes
+- Sample products live in `frontend/src/App.jsx` (`PRODUCTS`).
+- Mock fetch logic is in `backend/src/services/mockScraper.js`. To use a real scraper, replace `fetchReviewsFromSources` with external service calls (e.g., `scraper/index.js`).
+- CORS: adjust `FRONTEND_ORIGIN` (backend) and `VITE_API_URL` (frontend) when deploying.

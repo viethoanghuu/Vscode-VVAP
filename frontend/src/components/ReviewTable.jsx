@@ -57,7 +57,7 @@ export default function ReviewTable({ reviews, onFlagReview }) {
   if (!hasReviews) {
     return (
       <div className="card reviews-card-empty">
-        <p>No reviews yet. Click “Fetch Reviews”.</p>
+        <p>No reviews yet. Click "Fetch Reviews".</p>
       </div>
     );
   }
@@ -119,7 +119,7 @@ export default function ReviewTable({ reviews, onFlagReview }) {
                       className="ghost"
                       onClick={() => onFlagReview(r)}
                     >
-                      Gắn cờ
+                      Flag
                     </button>
                   )}
                 </div>

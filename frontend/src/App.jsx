@@ -34,8 +34,8 @@ const DEFAULT_PRODUCT_IMAGE = "/images/laptop.jpg";
 
 const TABS = [
   { id: "dashboard", label: "Dashboard" },
-  { id: "admin", label: "Quản trị" },
-  { id: "catalog", label: "Sản phẩm" },
+  { id: "admin", label: "Admin" },
+  { id: "catalog", label: "Catalog" },
 ];
 
 export default function App() {
@@ -143,7 +143,7 @@ export default function App() {
       setFlaggedQueue(data);
     } catch (err) {
       console.error(err);
-      setToast({ type: "error", message: "Không tải được danh sách gắn cờ." });
+      setToast({ type: "error", message: "Failed to load flagged list." });
     } finally {
       setQueueLoading(false);
     }
@@ -173,7 +173,7 @@ export default function App() {
     try {
       setSyncing(true);
       await axios.post(`${API}/api/products/${selected}/sync`);
-      setToast({ type: "success", message: "Đã đồng bộ dữ liệu thực tế." });
+      setToast({ type: "success", message: "Synced live data." });
       await fetchReviews();
       await fetchFlaggedReviews();
     } catch (err) {
@@ -187,17 +187,17 @@ export default function App() {
 
   async function flagReview(review) {
     try {
-      const reason = window.prompt("Lý do gắn cờ?", review.flag_reason || "") || "";
+      const reason = window.prompt("Flag reason?", review.flag_reason || "") || "";
       if (!review.review_id || !review.source) return;
       await axios.post(`${API}/api/products/${review.product_id || selected}/reviews/${review.source}/${review.review_id}/flag`, {
         reason,
       });
-      setToast({ type: "success", message: "Đã gắn cờ đánh giá." });
+      setToast({ type: "success", message: "Review flagged." });
       await fetchFlaggedReviews();
       await fetchReviews();
     } catch (err) {
       console.error(err);
-      setToast({ type: "error", message: "Không gắn cờ được." });
+      setToast({ type: "error", message: "Could not flag review." });
     }
   }
 
@@ -207,36 +207,36 @@ export default function App() {
         `${API}/api/admin/reviews/${review.product_id}/${review.source}/${review.review_id}`,
         { status, flag_reason: reason },
       );
-      setToast({ type: "success", message: `Đã cập nhật trạng thái: ${status}` });
+      setToast({ type: "success", message: `Status updated: ${status}` });
       await fetchFlaggedReviews();
       if (review.product_id === selected) await fetchReviews();
     } catch (err) {
       console.error(err);
-      setToast({ type: "error", message: "Không cập nhật được trạng thái." });
+      setToast({ type: "error", message: "Could not update status." });
     }
   }
 
   async function handleAddProduct() {
     if (!productForm.id || !productForm.name) {
-      setToast({ type: "error", message: "Cần nhập ID và tên sản phẩm." });
+      setToast({ type: "error", message: "Product ID and name are required." });
       return;
     }
     try {
       setSavingProduct(true);
       await axios.post(`${API}/api/products`, productForm);
-      setToast({ type: "success", message: "Đã lưu sản phẩm." });
+      setToast({ type: "success", message: "Product saved." });
       setProductForm({ id: "", name: "", image_url: "", source_url: "" });
       await loadProducts();
     } catch (err) {
       console.error(err);
-      setToast({ type: "error", message: "Không lưu được sản phẩm." });
+      setToast({ type: "error", message: "Could not save product." });
     } finally {
       setSavingProduct(false);
     }
   }
 
   async function handleDeleteProduct(id) {
-    if (!window.confirm("Xoá sản phẩm và toàn bộ reviews?")) return;
+    if (!window.confirm("Delete product and all reviews?")) return;
     try {
       await axios.delete(`${API}/api/products/${id}`, { params: { cascade: true } });
       if (id === selected) {
@@ -244,10 +244,10 @@ export default function App() {
         setSelected(next);
       }
       await loadProducts();
-      setToast({ type: "success", message: "Đã xoá sản phẩm." });
+      setToast({ type: "success", message: "Product deleted." });
     } catch (err) {
       console.error(err);
-      setToast({ type: "error", message: "Không xoá được sản phẩm." });
+      setToast({ type: "error", message: "Could not delete product." });
     }
   }
 
@@ -284,10 +284,10 @@ export default function App() {
               </select>
             </div>
             <button onClick={fetchReviews} disabled={loading}>
-              {loading ? "Fetching…" : "Fetch Reviews"}
+              {loading ? "Fetching..." : "Fetch Reviews"}
             </button>
             <button onClick={syncFromCommerce} disabled={syncing}>
-              {syncing ? "Syncing…" : "Sync live"}
+              {syncing ? "Syncing..." : "Sync live"}
             </button>
           </div>
         </div>
@@ -303,7 +303,7 @@ export default function App() {
                 <p className="product-hero-sub">Showing live reviews from your database.</p>
                 {selectedProduct.source_url && (
                   <a className="pill pill-link" href={selectedProduct.source_url} target="_blank" rel="noreferrer">
-                    Xem trên sàn
+                    View on storefront
                   </a>
                 )}
               </div>
@@ -394,13 +394,13 @@ export default function App() {
         <div className="footer-team">
           <div className="footer-team-title">Project Team</div>
           <div className="footer-team-list">
-            <span>Nguyễn Công Phúc</span>
+            <span>Nguyen Cong Phuc</span>
             <span>•</span>
-            <span>Hoàng Hữu Việt</span>
+            <span>Hoang Huu Viet</span>
             <span>•</span>
-            <span>Đặng Thuý An</span>
+            <span>Dang Thuy An</span>
             <span>•</span>
-            <span>Lê Đức Minh Vương</span>
+            <span>Le Duc Minh Vuong</span>
           </div>
         </div>
       </footer>
