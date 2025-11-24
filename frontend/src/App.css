@@ -483,4 +483,14 @@ input:focus-visible,
 .product-name { font-weight: 700; }
 .product-meta { color: var(--muted); font-size: 12px; }
 
+.pagination {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.pagination .page-meta { color: var(--muted); font-size: 13px; }
+
 

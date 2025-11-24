@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import RatingStars from "./RatingStars";
 
 const SOURCE_COLORS = {
@@ -33,6 +33,13 @@ function buildInitial(name) {
 
 export default function ReviewTable({ reviews, onFlagReview }) {
   const hasReviews = Array.isArray(reviews) && reviews.length > 0;
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 8;
+
+  useEffect(() => {
+    // Reset to first page when list changes
+    setPage(1);
+  }, [reviews]);
 
   const prepared = useMemo(() => {
     if (!hasReviews) return [];
@@ -54,6 +61,11 @@ export default function ReviewTable({ reviews, onFlagReview }) {
     });
   }, [hasReviews, reviews]);
 
+  const totalPages = Math.max(1, Math.ceil(prepared.length / PAGE_SIZE));
+  const pageSafe = Math.min(page, totalPages);
+  const start = (pageSafe - 1) * PAGE_SIZE;
+  const paged = prepared.slice(start, start + PAGE_SIZE);
+
   if (!hasReviews) {
     return (
       <div className="card reviews-card-empty">
@@ -66,7 +78,7 @@ export default function ReviewTable({ reviews, onFlagReview }) {
     <div className="card reviews-card" role="region" aria-label="Reviews list">
       <h3 className="card-title">Reviews</h3>
       <div className="reviews-list">
-        {prepared.map((r) => {
+        {paged.map((r) => {
           const color = pickColor(r.source);
           return (
             <article key={r.key} className="review-tile">
@@ -128,6 +140,24 @@ export default function ReviewTable({ reviews, onFlagReview }) {
           );
         })}
       </div>
+
+      {prepared.length > PAGE_SIZE && (
+        <div className="pagination">
+          <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe === 1}>
+            Prev
+          </button>
+          <span className="page-meta">
+            Page {pageSafe} / {totalPages} • {prepared.length} reviews
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={pageSafe === totalPages}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }
