@@ -84,7 +84,7 @@ html { scroll-behavior: smooth; }
 .tab-on { background: linear-gradient(135deg, rgba(var(--accent-rgb),0.2), rgba(124,58,237,0.2)); color: var(--text); box-shadow: 0 6px 16px rgba(0,0,0,0.25); }
 
 .content {
-  max-width: 1100px;
+  max-width: 1280px;
   margin: 32px auto;
   padding: 0 20px 56px;
 }
@@ -120,7 +120,8 @@ html { scroll-behavior: smooth; }
 /* Grid helpers */
 .grid { display: grid; gap: 18px; }
 .cards { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-bottom: 18px; align-items: stretch; }
-.charts { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.charts { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: stretch; }
+.charts.wide { grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); }
 .charts .card {
   min-height: 320px;
   display: flex;

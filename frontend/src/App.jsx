@@ -329,12 +329,12 @@ export default function App() {
 
             <StatsCards stats={stats} />
 
-            <div className="grid charts">
+            <div className="grid charts wide">
               <HistogramChart histogram={stats?.histogram} />
               <SourceBreakdownChart perSource={stats?.perSource} />
             </div>
 
-            <div className="grid charts">
+            <div className="grid charts wide">
               <TrendChart data={stats?.trend} />
               <StatusChart statusCounts={stats?.statusCounts} />
             </div>
