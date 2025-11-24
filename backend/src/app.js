@@ -2,6 +2,7 @@
 import cors from "cors";
 
 import productsRouter from "./routes/products.js";
+import adminRouter from "./routes/admin.js";
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use(
 
 app.get("/health", (_req, res) => res.json({ status: "ok" }));
 app.use("/api/products", productsRouter);
+app.use("/api/admin", adminRouter);
 
 // 404
 app.use((req, res) => res.status(404).json({ success: false, error: "Not Found" }));

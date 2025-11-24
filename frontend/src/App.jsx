@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import StatsCards from "./components/StatsCards";
 import HistogramChart from "./components/HistogramChart";
@@ -8,6 +8,10 @@ import Toast from "./components/Toast";
 import "./App.css";
 import RatingStars from "./components/RatingStars";
 import FilterBar from "./components/FilterBar";
+import TrendChart from "./components/TrendChart";
+import StatusChart from "./components/StatusChart";
+import AdminPanel from "./components/AdminPanel";
+import ProductManager from "./components/ProductManager";
 
 const FALLBACK_PRODUCTS = [
   { id: "asus-rog-zephyrus-g16", name: "ASUS ROG Zephyrus G16" },
@@ -28,36 +32,65 @@ const PRODUCT_IMAGES = {
 };
 const DEFAULT_PRODUCT_IMAGE = "/images/laptop.jpg";
 
+const TABS = [
+  { id: "dashboard", label: "Dashboard" },
+  { id: "admin", label: "Quản trị" },
+  { id: "catalog", label: "Sản phẩm" },
+];
+
 export default function App() {
   const [products, setProducts] = useState(FALLBACK_PRODUCTS);
   const [selected, setSelected] = useState(FALLBACK_PRODUCTS[0].id);
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState(null);
   const [activeSources, setActiveSources] = useState([]);
   const [toast, setToast] = useState(null);
+  const [flaggedQueue, setFlaggedQueue] = useState([]);
+  const [queueLoading, setQueueLoading] = useState(false);
+  const [productForm, setProductForm] = useState({
+    id: "",
+    name: "",
+    image_url: "",
+    source_url: "",
+  });
+  const [savingProduct, setSavingProduct] = useState(false);
 
   const API = useMemo(
     () => (import.meta.env.VITE_API_URL || "http://localhost:4000").replace(/\/$/, ""),
     [],
   );
 
-  const normalizeAggregate = (agg) => {
+  const normalizeAggregate = useCallback((agg) => {
     if (!agg) return null;
     const perSource = (agg.by_source || []).reduce((acc, s) => {
       acc[s.source] = { average: s.average_rating, count: s.review_count };
       return acc;
     }, {});
     const histogramArr = [1, 2, 3, 4, 5].map((n) => agg.rating_histogram?.[String(n)] || 0);
+    const statusCounts = agg.status_counts || {};
+    const trend = (agg.trend || []).map((t) => ({
+      day: t.day
+        ? new Date(t.day).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+        : "",
+      total: Number(t.total || 0),
+      approved: Number(t.approved || 0),
+      flagged: Number(t.flagged || 0),
+      pending: Number(t.pending || 0),
+    }));
     return {
       count: agg.overall?.total_reviews ?? 0,
       average: Number(agg.overall?.average_rating ?? 0),
       perSource,
       histogram: histogramArr,
+      statusCounts,
+      trend,
     };
-  };
+  }, []);
 
-  async function fetchReviews() {
+  const fetchReviews = useCallback(async () => {
     try {
       if (!selected) return;
       setLoading(true);
@@ -65,7 +98,7 @@ export default function App() {
         axios.get(`${API}/api/products/${selected}/reviews`),
         axios.get(`${API}/api/products/${selected}/aggregate`),
       ]);
-      const reviewsData = res.data?.data ?? res.data ?? [];
+      const reviewsData = (res.data?.data ?? res.data ?? []).filter((r) => r.status !== "rejected");
       const aggData = normalizeAggregate(agg.data?.data ?? agg.data);
       setReviews(reviewsData);
       setStats(aggData);
@@ -78,38 +111,145 @@ export default function App() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [API, normalizeAggregate, selected]);
+
+  const loadProducts = useCallback(async () => {
+    try {
+      const res = await axios.get(`${API}/api/products`);
+      const list = res.data?.data ?? res.data ?? [];
+      const normalized = list
+        .map((p) => ({
+          id: p.id || p.product_id || String(p),
+          name: p.name || p.product_id || String(p),
+          image_url: p.image_url || null,
+          source_url: p.source_url || null,
+        }))
+        .filter((p) => p.id);
+      if (normalized.length) {
+        setProducts(normalized);
+        setSelected((prev) => (prev && normalized.some((p) => p.id === prev) ? prev : normalized[0].id));
+      }
+    } catch (err) {
+      console.error("Failed to load products from API, using fallback.", err);
+      setToast((prev) => prev || { type: "warning", message: "Using fallback product list." });
+    }
+  }, [API]);
+
+  const fetchFlaggedReviews = useCallback(async () => {
+    try {
+      setQueueLoading(true);
+      const res = await axios.get(`${API}/api/admin/reviews/flagged`);
+      const data = res.data?.data ?? res.data ?? [];
+      setFlaggedQueue(data);
+    } catch (err) {
+      console.error(err);
+      setToast({ type: "error", message: "Không tải được danh sách gắn cờ." });
+    } finally {
+      setQueueLoading(false);
+    }
+  }, [API]);
 
   useEffect(() => {
-    async function loadProducts() {
-      try {
-        const res = await axios.get(`${API}/api/products`);
-        const list = res.data?.data ?? res.data ?? [];
-        const normalized = list
-          .map((p) => ({
-            id: p.id || p.product_id || String(p),
-            name: p.name || p.product_id || String(p),
-          }))
-          .filter((p) => p.id);
-        if (normalized.length) {
-          setProducts(normalized);
-          setSelected((prev) => (prev && normalized.some((p) => p.id === prev) ? prev : normalized[0].id));
-        }
-      } catch (err) {
-        console.error("Failed to load products from API, using fallback.", err);
-        setToast((prev) => prev || { type: "warning", message: "Using fallback product list." });
-      }
-    }
     loadProducts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [API]);
+  }, [loadProducts]);
+
+  useEffect(() => {
+    if (activeTab === "admin") {
+      fetchFlaggedReviews();
+    }
+  }, [activeTab, fetchFlaggedReviews]);
 
   const selectedProduct = useMemo(
     () => products.find((p) => p.id === selected) || { id: selected, name: selected },
     [products, selected],
   );
   const title = selectedProduct?.name || selected;
-  const productImage = PRODUCT_IMAGES[selectedProduct.id] || DEFAULT_PRODUCT_IMAGE;
+  const productImage = selectedProduct.image_url || PRODUCT_IMAGES[selectedProduct.id] || DEFAULT_PRODUCT_IMAGE;
+  const filteredReviews = activeSources.length
+    ? reviews.filter((r) => activeSources.includes(r.source) && r.status !== "rejected")
+    : [];
+
+  async function syncFromCommerce() {
+    try {
+      setSyncing(true);
+      await axios.post(`${API}/api/products/${selected}/sync`);
+      setToast({ type: "success", message: "Đã đồng bộ dữ liệu thực tế." });
+      await fetchReviews();
+      await fetchFlaggedReviews();
+    } catch (err) {
+      console.error(err);
+      const detail = err?.response?.data?.error || err?.message || "Sync failed";
+      setToast({ type: "error", message: String(detail) });
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function flagReview(review) {
+    try {
+      const reason = window.prompt("Lý do gắn cờ?", review.flag_reason || "") || "";
+      if (!review.review_id || !review.source) return;
+      await axios.post(`${API}/api/products/${review.product_id || selected}/reviews/${review.source}/${review.review_id}/flag`, {
+        reason,
+      });
+      setToast({ type: "success", message: "Đã gắn cờ đánh giá." });
+      await fetchFlaggedReviews();
+      await fetchReviews();
+    } catch (err) {
+      console.error(err);
+      setToast({ type: "error", message: "Không gắn cờ được." });
+    }
+  }
+
+  async function moderateReview(review, status, reason) {
+    try {
+      await axios.patch(
+        `${API}/api/admin/reviews/${review.product_id}/${review.source}/${review.review_id}`,
+        { status, flag_reason: reason },
+      );
+      setToast({ type: "success", message: `Đã cập nhật trạng thái: ${status}` });
+      await fetchFlaggedReviews();
+      if (review.product_id === selected) await fetchReviews();
+    } catch (err) {
+      console.error(err);
+      setToast({ type: "error", message: "Không cập nhật được trạng thái." });
+    }
+  }
+
+  async function handleAddProduct() {
+    if (!productForm.id || !productForm.name) {
+      setToast({ type: "error", message: "Cần nhập ID và tên sản phẩm." });
+      return;
+    }
+    try {
+      setSavingProduct(true);
+      await axios.post(`${API}/api/products`, productForm);
+      setToast({ type: "success", message: "Đã lưu sản phẩm." });
+      setProductForm({ id: "", name: "", image_url: "", source_url: "" });
+      await loadProducts();
+    } catch (err) {
+      console.error(err);
+      setToast({ type: "error", message: "Không lưu được sản phẩm." });
+    } finally {
+      setSavingProduct(false);
+    }
+  }
+
+  async function handleDeleteProduct(id) {
+    if (!window.confirm("Xoá sản phẩm và toàn bộ reviews?")) return;
+    try {
+      await axios.delete(`${API}/api/products/${id}`, { params: { cascade: true } });
+      if (id === selected) {
+        const next = products.find((p) => p.id !== id)?.id || FALLBACK_PRODUCTS[0].id;
+        setSelected(next);
+      }
+      await loadProducts();
+      setToast({ type: "success", message: "Đã xoá sản phẩm." });
+    } catch (err) {
+      console.error(err);
+      setToast({ type: "error", message: "Không xoá được sản phẩm." });
+    }
+  }
 
   return (
     <div className="page">
@@ -117,6 +257,18 @@ export default function App() {
         <div className="topbar-inner">
           <h1>Gaming Laptop Review Aggregator</h1>
           <div className="controls">
+            <div className="tabs">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  className={`tab ${activeTab === tab.id ? "tab-on" : ""}`}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
             <div className="select-wrap">
               <select
                 className="product-select"
@@ -134,42 +286,64 @@ export default function App() {
             <button onClick={fetchReviews} disabled={loading}>
               {loading ? "Fetching…" : "Fetch Reviews"}
             </button>
+            <button onClick={syncFromCommerce} disabled={syncing}>
+              {syncing ? "Syncing…" : "Sync live"}
+            </button>
           </div>
         </div>
       </header>
 
       <section className="content">
-        <div className="product-hero card">
-          <div className="product-hero-text">
-            <div className="label">Selected product</div>
-            <h2 className="product-hero-title">{title}</h2>
-            <p className="product-hero-sub">Showing live reviews from your database.</p>
-          </div>
-          <div className="product-hero-image" aria-hidden="true">
-            <img src={productImage} alt={`Product ${title}`} />
-          </div>
-        </div>
+        {activeTab === "dashboard" && (
+          <>
+            <div className="product-hero card">
+              <div className="product-hero-text">
+                <div className="label">Selected product</div>
+                <h2 className="product-hero-title">{title}</h2>
+                <p className="product-hero-sub">Showing live reviews from your database.</p>
+                {selectedProduct.source_url && (
+                  <a className="pill pill-link" href={selectedProduct.source_url} target="_blank" rel="noreferrer">
+                    Xem trên sàn
+                  </a>
+                )}
+              </div>
+              <div className="product-hero-image" aria-hidden="true">
+                <img src={productImage} alt={`Product ${title}`} />
+              </div>
+            </div>
 
-        <StatsCards stats={stats} />
+            <StatsCards stats={stats} />
 
-        <div className="grid charts">
-          <HistogramChart histogram={stats?.histogram} />
-          <SourceBreakdownChart perSource={stats?.perSource} />
-        </div>
+            <div className="grid charts">
+              <HistogramChart histogram={stats?.histogram} />
+              <SourceBreakdownChart perSource={stats?.perSource} />
+            </div>
 
-        <FilterBar
-          perSource={stats?.perSource}
-          active={activeSources}
-          onChange={setActiveSources}
-        />
+            <div className="grid charts">
+              <TrendChart data={stats?.trend} />
+              <StatusChart statusCounts={stats?.statusCounts} />
+            </div>
 
-        <ReviewTable
-          reviews={
-            activeSources.length
-              ? reviews.filter((r) => activeSources.includes(r.source))
-              : []
-          }
-        />
+            <FilterBar perSource={stats?.perSource} active={activeSources} onChange={setActiveSources} />
+
+            <ReviewTable reviews={filteredReviews} onFlagReview={flagReview} />
+          </>
+        )}
+
+        {activeTab === "admin" && (
+          <AdminPanel reviews={flaggedQueue} onModerate={moderateReview} loading={queueLoading} />
+        )}
+
+        {activeTab === "catalog" && (
+          <ProductManager
+            products={products}
+            form={productForm}
+            onChange={setProductForm}
+            onSubmit={handleAddProduct}
+            onDelete={handleDeleteProduct}
+            submitting={savingProduct}
+          />
+        )}
 
         {loading && (
           <div className="overlay">

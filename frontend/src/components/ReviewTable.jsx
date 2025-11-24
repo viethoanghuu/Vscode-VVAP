@@ -31,7 +31,7 @@ function buildInitial(name) {
   return clean.charAt(0).toUpperCase();
 }
 
-export default function ReviewTable({ reviews }) {
+export default function ReviewTable({ reviews, onFlagReview }) {
   const hasReviews = Array.isArray(reviews) && reviews.length > 0;
 
   const prepared = useMemo(() => {
@@ -40,12 +40,16 @@ export default function ReviewTable({ reviews }) {
       const key = r.id || r.review_id || `${r.source}-${idx}`;
       return {
         key,
+        product_id: r.product_id,
+        source: r.source || "Unknown",
+        review_id: r.review_id || r.id || key,
         author: r.author || "Anonymous",
         title: r.title || "Untitled review",
         body: r.content || r.body || "No content provided.",
-        source: r.source || "Unknown",
         rating: Number(r.rating || 0),
         date: r.created_at || r.review_date || null,
+        status: r.status || "approved",
+        flag_reason: r.flag_reason,
       };
     });
   }, [hasReviews, reviews]);
@@ -79,11 +83,11 @@ export default function ReviewTable({ reviews }) {
                     {buildInitial(r.author)}
                   </div>
                   <div className="reviewer-meta">
-                    <div className="name-row">
-                      <span className="name">{r.author}</span>
-                      <span
-                        className="source-pill"
-                        style={{
+                <div className="name-row">
+                  <span className="name">{r.author}</span>
+                  <span
+                    className="source-pill"
+                    style={{
                           backgroundColor: color,
                           boxShadow: `0 8px 18px ${color}33`,
                         }}
@@ -104,6 +108,21 @@ export default function ReviewTable({ reviews }) {
               <div className="review-body">
                 <div className="review-title">{r.title}</div>
                 <p className="review-text">{r.body}</p>
+                <div className="review-footer">
+                  <span className={`pill ${r.status === "flagged" ? "pill-warm" : "pill-muted"}`}>
+                    {r.status}
+                  </span>
+                  {r.flag_reason && <span className="flag-reason">Flag: {r.flag_reason}</span>}
+                  {onFlagReview && (
+                    <button
+                      type="button"
+                      className="ghost"
+                      onClick={() => onFlagReview(r)}
+                    >
+                      Gắn cờ
+                    </button>
+                  )}
+                </div>
               </div>
             </article>
           );
