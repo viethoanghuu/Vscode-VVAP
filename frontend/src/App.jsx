@@ -23,14 +23,14 @@ const FALLBACK_PRODUCTS = [
 ];
 
 const PRODUCT_IMAGES = {
-  "asus-rog-zephyrus-g16": "/images/dog.jpg",
-  "lenovo-legion-5-pro": "/images/laptop.jpg",
-  "acer-predator-helios-300": "/images/laptop.jpg",
-  "msi-raider-ge78": "/images/laptop.jpg",
-  "alienware-m16": "/images/laptop.jpg",
-  "hp-omen-16": "/images/laptop.jpg",
+  "asus-rog-zephyrus-g16": "/images/asusrogzephyrusg16.jpg",
+  "lenovo-legion-5-pro": "/images/lenovolegion5pro.jpg",
+  "acer-predator-helios-300": "/images/acerpredatorhelios300.webp",
+  "msi-raider-ge78": "/images/RaiderGE78.jpg",
+  "alienware-m16": "/images/alienwarem16.jpg",
+  "hp-omen-16": "/images/hpomen.avif",
 };
-const DEFAULT_PRODUCT_IMAGE = "/images/laptop.jpg";
+const DEFAULT_PRODUCT_IMAGE = "/images/hpomen.avif";
 
 const TABS = [
   { id: "dashboard", label: "Dashboard" },
