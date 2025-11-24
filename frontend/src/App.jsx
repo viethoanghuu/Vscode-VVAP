@@ -18,6 +18,23 @@ const FALLBACK_PRODUCTS = [
   { id: "hp-omen-16", name: "HP Omen 16" },
 ];
 
+const PRODUCT_IMAGES = {
+  "asus-rog-zephyrus-g16":
+    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80",
+  "lenovo-legion-5-pro":
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+  "acer-predator-helios-300":
+    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
+  "msi-raider-ge78":
+    "https://images.unsplash.com/photo-1481277542470-605612bd2d61?auto=format&fit=crop&w=1200&q=80",
+  "alienware-m16":
+    "https://images.unsplash.com/photo-1483478550801-ceba5fe50e8e?auto=format&fit=crop&w=1200&q=80",
+  "hp-omen-16":
+    "https://images.unsplash.com/photo-1472220625704-91e1462799b2?auto=format&fit=crop&w=1200&q=80",
+};
+const DEFAULT_PRODUCT_IMAGE =
+  "https://images.unsplash.com/photo-1481277542470-605612bd2d61?auto=format&fit=crop&w=1200&q=80";
+
 export default function App() {
   const [products, setProducts] = useState(FALLBACK_PRODUCTS);
   const [selected, setSelected] = useState(FALLBACK_PRODUCTS[0].id);
@@ -94,7 +111,12 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [API]);
 
-  const title = products.find((p) => p.id === selected)?.name || selected;
+  const selectedProduct = useMemo(
+    () => products.find((p) => p.id === selected) || { id: selected, name: selected },
+    [products, selected],
+  );
+  const title = selectedProduct?.name || selected;
+  const productImage = PRODUCT_IMAGES[selectedProduct.id] || DEFAULT_PRODUCT_IMAGE;
 
   return (
     <div className="page">
@@ -124,7 +146,16 @@ export default function App() {
       </header>
 
       <section className="content">
-        <h2 className="section-title">{title}</h2>
+        <div className="product-hero card">
+          <div className="product-hero-text">
+            <div className="label">Selected product</div>
+            <h2 className="product-hero-title">{title}</h2>
+            <p className="product-hero-sub">Showing live reviews from your database.</p>
+          </div>
+          <div className="product-hero-image" aria-hidden="true">
+            <img src={productImage} alt={`Product ${title}`} />
+          </div>
+        </div>
 
         <StatsCards stats={stats} />
 
