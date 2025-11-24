@@ -19,21 +19,14 @@ const FALLBACK_PRODUCTS = [
 ];
 
 const PRODUCT_IMAGES = {
-  "asus-rog-zephyrus-g16":
-    "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80",
-  "lenovo-legion-5-pro":
-    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
-  "acer-predator-helios-300":
-    "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80",
-  "msi-raider-ge78":
-    "https://images.unsplash.com/photo-1481277542470-605612bd2d61?auto=format&fit=crop&w=1200&q=80",
-  "alienware-m16":
-    "https://images.unsplash.com/photo-1483478550801-ceba5fe50e8e?auto=format&fit=crop&w=1200&q=80",
-  "hp-omen-16":
-    "https://images.unsplash.com/photo-1472220625704-91e1462799b2?auto=format&fit=crop&w=1200&q=80",
+  "asus-rog-zephyrus-g16": "/images/dog.jpg",
+  "lenovo-legion-5-pro": "/images/laptop.jpg",
+  "acer-predator-helios-300": "/images/laptop.jpg",
+  "msi-raider-ge78": "/images/laptop.jpg",
+  "alienware-m16": "/images/laptop.jpg",
+  "hp-omen-16": "/images/laptop.jpg",
 };
-const DEFAULT_PRODUCT_IMAGE =
-  "https://images.unsplash.com/photo-1481277542470-605612bd2d61?auto=format&fit=crop&w=1200&q=80";
+const DEFAULT_PRODUCT_IMAGE = "/images/laptop.jpg";
 
 export default function App() {
   const [products, setProducts] = useState(FALLBACK_PRODUCTS);
