@@ -11,34 +11,35 @@ export default function StatsCards({ stats }) {
   const flagged = stats.statusCounts?.flagged ?? 0;
   const pending = stats.statusCounts?.pending ?? 0;
 
+  const cards = [
+    { key: "total", label: "Total Reviews", value: total, sub: "All sources combined", accent: "blue" },
+    {
+      key: "avg",
+      label: "Average Rating",
+      value: (
+        <div className="stat-rating">
+          <RatingStars value={avg} />
+          <span className="stat-number">{avg.toFixed(1)}/5</span>
+        </div>
+      ),
+      sub: "Weighted by count",
+      accent: "amber",
+    },
+    { key: "sources", label: "Sources", value: sources, sub: "Active feeds", accent: "teal" },
+    { key: "flagged", label: "Flagged", value: flagged, sub: "Needing review", accent: "pink" },
+    { key: "pending", label: "Pending", value: pending, sub: "Awaiting moderation", accent: "violet" },
+  ];
+
   return (
     <div className="grid cards">
-      <div className="card">
-        <div className="label">Total Reviews</div>
-        <div className="value">{total}</div>
-      </div>
-
-      <div className="card">
-        <div className="label">Average Rating</div>
-        <div className="value">
-          <RatingStars value={avg} />
+      {cards.map((card) => (
+        <div key={card.key} className={`card stat-card accent-${card.accent}`}>
+          <div className="label">{card.label}</div>
+          <div className="value">{card.value}</div>
+          <div className="stat-sub">{card.sub}</div>
+          <div className="stat-glow" aria-hidden="true" />
         </div>
-      </div>
-
-      <div className="card">
-        <div className="label">Sources</div>
-        <div className="value">{sources}</div>
-      </div>
-
-      <div className="card">
-        <div className="label">Flagged</div>
-        <div className="value">{flagged}</div>
-      </div>
-
-      <div className="card">
-        <div className="label">Pending</div>
-        <div className="value">{pending}</div>
-      </div>
+      ))}
     </div>
   );
 }

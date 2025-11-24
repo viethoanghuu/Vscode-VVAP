@@ -43,7 +43,7 @@ export default function ReviewTable({ reviews, onFlagReview }) {
         product_id: r.product_id,
         source: r.source || "Unknown",
         review_id: r.review_id || r.id || key,
-        author: r.author || "Anonymous",
+        author: r.author || "Unknown reviewer",
         title: r.title || "Untitled review",
         body: r.content || r.body || "No content provided.",
         rating: Number(r.rating || 0),
