@@ -49,7 +49,6 @@ export default function App() {
   async function fetchReviews() {
     try {
       setLoading(true);
-      await axios.post(`${API}/api/products/${selected}/fetch`);
       const [res, agg] = await Promise.all([
         axios.get(`${API}/api/products/${selected}/reviews`),
         axios.get(`${API}/api/products/${selected}/aggregate`),
