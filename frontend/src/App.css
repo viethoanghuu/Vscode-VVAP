@@ -33,6 +33,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+html { scroll-behavior: smooth; }
 
 /* Layout */
 .page {
@@ -378,6 +379,10 @@ input:focus-visible,
   box-shadow: 0 10px 35px rgba(0,0,0,0.35);
   display: grid;
   gap: 10px;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeUp 0.45s ease forwards;
+  will-change: transform, opacity;
 }
 .review-header {
   display: flex;
@@ -492,5 +497,10 @@ input:focus-visible,
   flex-wrap: wrap;
 }
 .pagination .page-meta { color: var(--muted); font-size: 13px; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 

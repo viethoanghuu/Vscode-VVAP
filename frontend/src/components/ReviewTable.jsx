@@ -78,10 +78,14 @@ export default function ReviewTable({ reviews, onFlagReview }) {
     <div className="card reviews-card" role="region" aria-label="Reviews list">
       <h3 className="card-title">Reviews</h3>
       <div className="reviews-list">
-        {paged.map((r) => {
+        {paged.map((r, idx) => {
           const color = pickColor(r.source);
           return (
-            <article key={r.key} className="review-tile">
+            <article
+              key={r.key}
+              className="review-tile animate-in"
+              style={{ animationDelay: `${idx * 60}ms` }}
+            >
               <div className="review-header">
                 <div className="reviewer">
                   <div
