@@ -30,7 +30,7 @@ const PRODUCT_IMAGES = {
   "alienware-m16": "/images/alienwarem16.jpg",
   "hp-omen-16": "/images/hpomen.avif",
 };
-const DEFAULT_PRODUCT_IMAGE = "/images/hpomen.avif";
+const DEFAULT_PRODUCT_IMAGE = "/images/lenovolegion5pro.jpg";
 
 const TABS = [
   { id: "dashboard", label: "Dashboard" },
@@ -164,7 +164,14 @@ export default function App() {
     [products, selected],
   );
   const title = selectedProduct?.name || selected;
-  const productImage = selectedProduct.image_url || PRODUCT_IMAGES[selectedProduct.id] || DEFAULT_PRODUCT_IMAGE;
+  const [heroSrc, setHeroSrc] = useState(
+    selectedProduct.image_url || PRODUCT_IMAGES[selectedProduct.id] || DEFAULT_PRODUCT_IMAGE,
+  );
+
+  useEffect(() => {
+    // Update hero when product changes
+    setHeroSrc(selectedProduct.image_url || PRODUCT_IMAGES[selectedProduct.id] || DEFAULT_PRODUCT_IMAGE);
+  }, [selectedProduct]);
   const filteredReviews = activeSources.length
     ? reviews.filter((r) => activeSources.includes(r.source) && r.status !== "rejected")
     : [];
@@ -308,7 +315,15 @@ export default function App() {
                 )}
               </div>
               <div className="product-hero-image" aria-hidden="true">
-                <img src={productImage} alt={`Product ${title}`} />
+                <img
+                  src={heroSrc}
+                  alt={`Product ${title}`}
+                  onError={(e) => {
+                    if (heroSrc !== DEFAULT_PRODUCT_IMAGE) {
+                      setHeroSrc(DEFAULT_PRODUCT_IMAGE);
+                    }
+                  }}
+                />
               </div>
             </div>
 

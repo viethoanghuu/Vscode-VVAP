@@ -145,7 +145,7 @@ export default function ReviewTable({ reviews, onFlagReview }) {
         })}
       </div>
 
-      {prepared.length > PAGE_SIZE && (
+      {prepared.length > 0 && (
         <div className="pagination">
           <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={pageSafe === 1}>
             Prev

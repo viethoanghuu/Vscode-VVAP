@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   PieChart,
   Pie,
@@ -24,27 +24,42 @@ export default function SourceBreakdownChart({ perSource }) {
     "#0ea5e9",
   ];
 
+  const boxRef = useRef(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!boxRef.current) return undefined;
+    const obs = new ResizeObserver((entries) => {
+      const { width, height } = entries[0].contentRect || { width: 0, height: 0 };
+      setReady(width > 0 && height > 0);
+    });
+    obs.observe(boxRef.current);
+    return () => obs.disconnect();
+  }, []);
+
   return (
     <div className="card" role="region" aria-label="Source breakdown">
       <h3 className="card-title">Reviews by Source</h3>
-      <div className="chart" style={{ height: 260 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              dataKey="value"
-              nameKey="name"
-              outerRadius={90}
-              label
-            >
-              {data.map((_, idx) => (
-                <Cell key={idx} fill={palette[idx % palette.length]} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
+      <div className="chart" style={{ height: 260 }} ref={boxRef}>
+        {ready && (
+          <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
+            <PieChart>
+              <Pie
+                data={data}
+                dataKey="value"
+                nameKey="name"
+                outerRadius={90}
+                label
+              >
+                {data.map((_, idx) => (
+                  <Cell key={idx} fill={palette[idx % palette.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       <ul className="mini-list">
