@@ -32,13 +32,20 @@ export default function StatusChart({ statusCounts }) {
         {ready && (
           <ResponsiveContainer width="100%" height="100%" minWidth={200} minHeight={200}>
             <PieChart>
-              <Pie data={data} dataKey="value" nameKey="name" outerRadius={90} label>
+              <Pie data={data} dataKey="value" nameKey="name" outerRadius={90} innerRadius={40} label>
                 {data.map((d, idx) => (
                   <Cell key={d.name} fill={colors[d.name] || ["#60a5fa", "#22c55e", "#f97316", "#ef4444"][idx % 4]} />
                 ))}
               </Pie>
               <Tooltip />
-              <Legend />
+              <Legend
+                verticalAlign="bottom"
+                layout="horizontal"
+                align="center"
+                iconType="circle"
+                iconSize={10}
+                wrapperStyle={{ paddingTop: 6, fontSize: 12 }}
+              />
             </PieChart>
           </ResponsiveContainer>
         )}

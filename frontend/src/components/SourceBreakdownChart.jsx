@@ -56,7 +56,14 @@ export default function SourceBreakdownChart({ perSource }) {
                 ))}
               </Pie>
               <Tooltip />
-              <Legend />
+              <Legend
+                verticalAlign="bottom"
+                layout="horizontal"
+                align="center"
+                iconType="square"
+                iconSize={10}
+                wrapperStyle={{ paddingTop: 6, fontSize: 12 }}
+              />
             </PieChart>
           </ResponsiveContainer>
         )}
