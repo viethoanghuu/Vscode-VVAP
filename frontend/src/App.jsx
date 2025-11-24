@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import StatsCards from "./components/StatsCards";
 import HistogramChart from "./components/HistogramChart";
@@ -9,7 +9,7 @@ import "./App.css";
 import RatingStars from "./components/RatingStars";
 import FilterBar from "./components/FilterBar";
 
-const PRODUCTS = [
+const FALLBACK_PRODUCTS = [
   { id: "asus-rog-zephyrus-g16", name: "ASUS ROG Zephyrus G16" },
   { id: "lenovo-legion-5-pro", name: "Lenovo Legion 5 Pro" },
   { id: "acer-predator-helios-300", name: "Acer Predator Helios 300" },
@@ -19,7 +19,8 @@ const PRODUCTS = [
 ];
 
 export default function App() {
-  const [selected, setSelected] = useState(PRODUCTS[0].id);
+  const [products, setProducts] = useState(FALLBACK_PRODUCTS);
+  const [selected, setSelected] = useState(FALLBACK_PRODUCTS[0].id);
   const [loading, setLoading] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState(null);
@@ -48,6 +49,7 @@ export default function App() {
 
   async function fetchReviews() {
     try {
+      if (!selected) return;
       setLoading(true);
       const [res, agg] = await Promise.all([
         axios.get(`${API}/api/products/${selected}/reviews`),
@@ -68,7 +70,31 @@ export default function App() {
     }
   }
 
-  const title = PRODUCTS.find((p) => p.id === selected)?.name || selected;
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const res = await axios.get(`${API}/api/products`);
+        const list = res.data?.data ?? res.data ?? [];
+        const normalized = list
+          .map((p) => ({
+            id: p.id || p.product_id || String(p),
+            name: p.name || p.product_id || String(p),
+          }))
+          .filter((p) => p.id);
+        if (normalized.length) {
+          setProducts(normalized);
+          setSelected((prev) => (prev && normalized.some((p) => p.id === prev) ? prev : normalized[0].id));
+        }
+      } catch (err) {
+        console.error("Failed to load products from API, using fallback.", err);
+        setToast((prev) => prev || { type: "warning", message: "Using fallback product list." });
+      }
+    }
+    loadProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API]);
+
+  const title = products.find((p) => p.id === selected)?.name || selected;
 
   return (
     <div className="page">
@@ -76,17 +102,20 @@ export default function App() {
         <div className="topbar-inner">
           <h1>Gaming Laptop Review Aggregator</h1>
           <div className="controls">
-            <select
-              value={selected}
-              onChange={(e) => setSelected(e.target.value)}
-              aria-label="Select product"
-            >
-              {PRODUCTS.map((p) => (
+            <div className="select-wrap">
+              <select
+                className="product-select"
+                value={selected}
+                onChange={(e) => setSelected(e.target.value)}
+                aria-label="Select product"
+              >
+              {products.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name}
                 </option>
               ))}
-            </select>
+              </select>
+            </div>
             <button onClick={fetchReviews} disabled={loading}>
               {loading ? "Fetching…" : "Fetch Reviews"}
             </button>

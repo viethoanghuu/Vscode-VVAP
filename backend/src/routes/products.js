@@ -4,6 +4,19 @@ import { fetchReviewsFromSources } from "../services/mockScraper.js";
 
 const router = express.Router();
 
+// GET /api/products
+router.get("/", async (_req, res, next) => {
+  try {
+    const [rows] = await pool.execute(
+      "SELECT DISTINCT product_id FROM reviews ORDER BY product_id ASC",
+    );
+    const products = rows.map((r) => ({ id: r.product_id, name: r.product_id }));
+    res.json({ success: true, data: products });
+  } catch (e) {
+    next(e);
+  }
+});
+
 // POST /api/products/:id/fetch
 router.post("/:id/fetch", async (req, res, next) => {
   try {
