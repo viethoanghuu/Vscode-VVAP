@@ -16,7 +16,7 @@ import ProductManager from "./components/ProductManager";
 const FALLBACK_PRODUCTS = [
   { id: "asus-rog-zephyrus-g16", name: "ASUS ROG Zephyrus G16" },
   { id: "lenovo-legion-5-pro", name: "Lenovo Legion 5 Pro" },
-  { id: "acer-predator-helios-300", name: "Acer Predator Helios" },
+  { id: "acer-predator-helios-300", name: "Acer Predator Helios 300" },
   { id: "msi-raider-ge78", name: "MSI Raider GE78" },
   { id: "alienware-m16", name: "Alienware M16" },
   { id: "hp-omen-16", name: "HP Omen 16" },
