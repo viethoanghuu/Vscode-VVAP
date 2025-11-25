@@ -23,12 +23,12 @@ const FALLBACK_PRODUCTS = [
 ];
 
 const PRODUCT_IMAGES = {
-  "asus-rog-zephyrus-g16": "/images/asusrogzephyrusg16.jpg",
-  "lenovo-legion-5-pro": "/images/lenovolegion5pro.jpg",
-  "acer-predator-helios-300": "/images/acerpredatorhelios300.jpg",
-  "msi-raider-ge78": "/images/RaiderGE78.jpg",
-  "alienware-m16": "/images/alienwarem16.jpg",
-  "hp-omen-16": "/images/hpomen.avif",
+  "asus-rog-zephyrus-g16": "/images/rogg16.jpg",
+  "lenovo-legion-5-pro": "/images/LenovoLegion5Pro.jpg",
+  "acer-predator-helios-300": "/images/helios300.jpg",
+  "msi-raider-ge78": "/images/raiderge78.jpg",
+  "alienware-m16": "/images/alienm16.jpg",
+  "hp-omen-16": "/images/hpomen16.jpg",
 };
 const DEFAULT_PRODUCT_IMAGE = "/images/lenovolegion5pro.jpg";
 
