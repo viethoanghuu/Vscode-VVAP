@@ -33,7 +33,9 @@ CREATE TABLE IF NOT EXISTS reviews (
 
 -- Defensive ALTERs for existing databases
 ALTER TABLE reviews
-  ADD COLUMN IF NOT EXISTS status ENUM('pending', 'approved', 'flagged', 'rejected') NOT NULL DEFAULT 'approved',
-  ADD COLUMN IF NOT EXISTS flag_reason VARCHAR(255) NULL,
-  ADD COLUMN IF NOT EXISTS last_moderated_at DATETIME NULL,
-  ADD COLUMN IF NOT EXISTS helpful_count INT NOT NULL DEFAULT 0;
+  ADD COLUMN status ENUM('pending', 'approved', 'flagged', 'rejected') NOT NULL DEFAULT 'approved',
+  ADD COLUMN flag_reason VARCHAR(255) NULL,
+  ADD COLUMN last_moderated_at DATETIME NULL,
+  ADD COLUMN helpful_count INT NOT NULL DEFAULT 0,
+  ADD COLUMN like_count INT NOT NULL DEFAULT 0,
+  ADD COLUMN dislike_count INT NOT NULL DEFAULT 0;

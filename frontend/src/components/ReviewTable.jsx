@@ -31,7 +31,7 @@ function buildInitial(name) {
   return clean.charAt(0).toUpperCase();
 }
 
-export default function ReviewTable({ reviews, onFlagReview }) {
+export default function ReviewTable({ reviews, onFlagReview, onReact }) {
   const hasReviews = Array.isArray(reviews) && reviews.length > 0;
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 8;
@@ -57,6 +57,8 @@ export default function ReviewTable({ reviews, onFlagReview }) {
         date: r.created_at || r.review_date || null,
         status: r.status || "approved",
         flag_reason: r.flag_reason,
+        like_count: Number(r.like_count || 0),
+        dislike_count: Number(r.dislike_count || 0),
       };
     });
   }, [hasReviews, reviews]);
@@ -129,6 +131,16 @@ export default function ReviewTable({ reviews, onFlagReview }) {
                     {r.status}
                   </span>
                   {r.flag_reason && <span className="flag-reason">Flag: {r.flag_reason}</span>}
+                  {onReact && (
+                    <div className="reactions" aria-label="Reactions">
+                      <button type="button" className="ghost icon" onClick={() => onReact(r, "like")}>
+                        👍 <span>{r.like_count}</span>
+                      </button>
+                      <button type="button" className="ghost icon" onClick={() => onReact(r, "dislike")}>
+                        👎 <span>{r.dislike_count}</span>
+                      </button>
+                    </div>
+                  )}
                   {onFlagReview && (
                     <button
                       type="button"

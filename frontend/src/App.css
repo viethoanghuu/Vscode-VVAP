@@ -471,6 +471,18 @@ input:focus-visible,
 .review-footer { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
 .flag-reason { color: #fbbf24; font-size: 12px; }
 .muted { color: var(--muted); }
+.reactions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.reactions .icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  font-weight: 700;
+}
 
 .pill {
   display: inline-flex;

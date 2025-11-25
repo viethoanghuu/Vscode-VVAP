@@ -41,15 +41,17 @@ async function bulkInsertReviews(productId, reviews) {
   for (const s of reviews) {
     try {
       const [result] = await pool.execute(
-        `INSERT INTO reviews (product_id, source, review_id, author, rating, title, body, created_at, fetched_at, status, flag_reason)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+        `INSERT INTO reviews (product_id, source, review_id, author, rating, title, body, created_at, fetched_at, status, flag_reason, like_count, dislike_count)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE
            fetched_at = VALUES(fetched_at),
            rating = VALUES(rating),
            title = VALUES(title),
            body = VALUES(body),
            status = VALUES(status),
-           flag_reason = VALUES(flag_reason)`,
+           flag_reason = VALUES(flag_reason),
+           like_count = VALUES(like_count),
+           dislike_count = VALUES(dislike_count)`,
         [
           productId,
           s.source,
@@ -61,6 +63,8 @@ async function bulkInsertReviews(productId, reviews) {
           s.review_date,
           moderationStatuses.includes(s.status) ? s.status : "approved",
           s.flag_reason || null,
+          Number(s.like_count || 0),
+          Number(s.dislike_count || 0),
         ],
       );
       if (result.affectedRows === 1) added++;
@@ -246,7 +250,7 @@ router.get("/:id/reviews", async (req, res, next) => {
     const productId = String(req.params.id);
     const [rows] = await pool.execute(
       `SELECT product_id, source, review_id, author AS reviewer_name, rating, title, body AS content,
-              created_at, fetched_at, status, flag_reason
+              created_at, fetched_at, status, flag_reason, like_count, dislike_count
        FROM reviews
        WHERE product_id=?
        ORDER BY COALESCE(created_at, fetched_at) DESC
@@ -286,6 +290,41 @@ router.post("/:id/reviews/:source/:reviewId/flag", async (req, res, next) => {
     );
 
     res.json({ success: true, updated: result.affectedRows === 1 });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// POST /api/products/:id/reviews/:source/:reviewId/react - increment like/dislike counters
+router.post("/:id/reviews/:source/:reviewId/react", async (req, res, next) => {
+  try {
+    const productId = String(req.params.id);
+    const source = String(req.params.source);
+    const reviewId = String(req.params.reviewId);
+    const action = String(req.body?.action || "").toLowerCase();
+
+    if (!["like", "dislike"].includes(action)) {
+      return res.status(400).json({ success: false, error: "Invalid action" });
+    }
+
+    const column = action === "like" ? "like_count" : "dislike_count";
+    const [result] = await pool.execute(
+      `UPDATE reviews
+       SET ${column} = ${column} + 1, last_moderated_at=NOW()
+       WHERE product_id=? AND source=? AND review_id=?`,
+      [productId, source, reviewId],
+    );
+
+    if (result.affectedRows !== 1) {
+      return res.status(404).json({ success: false, error: "Review not found" });
+    }
+
+    const [[row]] = await pool.execute(
+      "SELECT like_count, dislike_count FROM reviews WHERE product_id=? AND source=? AND review_id=?",
+      [productId, source, reviewId],
+    );
+
+    res.json({ success: true, data: row });
   } catch (e) {
     next(e);
   }
