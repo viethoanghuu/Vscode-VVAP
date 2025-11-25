@@ -125,13 +125,23 @@ export default function App() {
           source_url: p.source_url || null,
         }))
         .filter((p) => p.id);
-      if (normalized.length) {
-        setProducts(normalized);
-        setSelected((prev) => (prev && normalized.some((p) => p.id === prev) ? prev : normalized[0].id));
-      }
+
+      // Merge API products with fallback to avoid empty/partial lists in UI
+      const merged = [...normalized, ...FALLBACK_PRODUCTS]
+        .reduce((acc, item) => {
+          if (!acc.some((p) => p.id === item.id)) acc.push(item);
+          return acc;
+        }, []);
+
+      setProducts(merged);
+      setSelected((prev) => (prev && merged.some((p) => p.id === prev) ? prev : merged[0]?.id || ""));
     } catch (err) {
       console.error("Failed to load products from API, using fallback.", err);
       setToast((prev) => prev || { type: "warning", message: "Using fallback product list." });
+      setProducts(FALLBACK_PRODUCTS);
+      setSelected((prev) =>
+        prev && FALLBACK_PRODUCTS.some((p) => p.id === prev) ? prev : FALLBACK_PRODUCTS[0].id,
+      );
     }
   }, [API]);
 
