@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 
-export default function FilterBar({ perSource = {}, active = [], onChange }) {
+export default function FilterBar({ perSource = {}, active = [], onChange, ratingFilter, onRatingChange }) {
   const sources = useMemo(() => Object.keys(perSource || {}), [perSource]);
   if (!sources || sources.length === 0) return null;
 
@@ -48,6 +48,29 @@ export default function FilterBar({ perSource = {}, active = [], onChange }) {
               </button>
             );
           })}
+        </div>
+      </div>
+
+      <div className="filter-row">
+        <span className="label">Filter by rating:</span>
+        <div className="chips">
+          {[
+            { key: null, label: "All" },
+            { key: "5", label: "5★" },
+            { key: "4plus", label: "≥ 4★" },
+            { key: "3plus", label: "≥ 3★" },
+            { key: "2below", label: "≤ 2★" },
+          ].map((opt) => (
+            <button
+              key={opt.label}
+              type="button"
+              className={`chip ${ratingFilter === opt.key ? "chip-on" : ""}`}
+              onClick={() => onRatingChange && onRatingChange(opt.key)}
+              aria-pressed={ratingFilter === opt.key}
+            >
+              {opt.label}
+            </button>
+          ))}
         </div>
       </div>
     </div>

@@ -47,6 +47,7 @@ export default function App() {
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState(null);
   const [activeSources, setActiveSources] = useState([]);
+  const [ratingFilter, setRatingFilter] = useState(null);
   const [toast, setToast] = useState(null);
   const [flaggedQueue, setFlaggedQueue] = useState([]);
   const [queueLoading, setQueueLoading] = useState(false);
@@ -182,9 +183,21 @@ export default function App() {
     // Update hero when product changes
     setHeroSrc(selectedProduct.image_url || PRODUCT_IMAGES[selectedProduct.id] || DEFAULT_PRODUCT_IMAGE);
   }, [selectedProduct]);
-  const filteredReviews = activeSources.length
-    ? reviews.filter((r) => activeSources.includes(r.source) && r.status !== "rejected")
-    : [];
+  const filteredReviews = useMemo(() => {
+    let list = reviews.filter((r) => r.status !== "rejected");
+    if (activeSources.length) list = list.filter((r) => activeSources.includes(r.source));
+    if (ratingFilter) {
+      list = list.filter((r) => {
+        const rating = Number(r.rating || 0);
+        if (ratingFilter === "5") return rating === 5;
+        if (ratingFilter === "4plus") return rating >= 4;
+        if (ratingFilter === "3plus") return rating >= 3;
+        if (ratingFilter === "2below") return rating <= 2;
+        return true;
+      });
+    }
+    return list;
+  }, [activeSources, ratingFilter, reviews]);
 
   async function syncFromCommerce() {
     try {
@@ -382,7 +395,13 @@ export default function App() {
               return <div className={`grid ${layoutClass}`}>{row}</div>;
             })()}
 
-            <FilterBar perSource={stats?.perSource} active={activeSources} onChange={setActiveSources} />
+            <FilterBar
+              perSource={stats?.perSource}
+              active={activeSources}
+              onChange={setActiveSources}
+              ratingFilter={ratingFilter}
+              onRatingChange={setRatingFilter}
+            />
 
             <ReviewTable reviews={filteredReviews} onFlagReview={flagReview} onReact={reactReview} />
           </>
